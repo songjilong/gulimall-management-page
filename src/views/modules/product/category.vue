@@ -2,7 +2,8 @@
 <template>
   <div>
     <el-switch v-model="draggable" active-text="开启拖拽" inactive-text="关闭拖拽"></el-switch>
-    <el-button v-if="draggable" type="success" icon="el-icon-check" circle @click="batchSave"></el-button>
+    <el-button v-if="draggable" type="success" @click="batchSave" round>提交拖拽</el-button>
+    <el-button type="danger" @click="batchRemove" round>批量删除</el-button>
     <el-tree
       :data="menus"
       :props="defaultProps"
@@ -13,6 +14,7 @@
       :draggable="draggable"
       :allow-drop="allowDrop"
       @node-drop="handleDrop"
+      ref="menuTree"
     >
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <span>{{ node.label }}</span>
@@ -81,7 +83,7 @@ export default {
       maxLevel: 0,
       updateNodes: [],
       draggable: false,
-      pCid: [],
+      pCid: []
     };
   },
   methods: {
@@ -128,14 +130,14 @@ export default {
           //关闭弹出框
           this.dialogVisible = false;
           //显示成功消息
-          this.successMsg("菜单添加成功");
+          this.$message.success("菜单添加成功");
           //刷新页面
           this.getMenus();
           //展开当前父菜单
           this.expandedKey = [this.category.parentCid];
         })
         .catch(() => {
-          this.warningMsg("菜单添加失败");
+          this.$message.error("菜单添加失败");
         });
     },
     //修改三级菜单数据
@@ -173,14 +175,14 @@ export default {
           //关闭弹出框
           this.dialogVisible = false;
           //显示成功消息
-          this.successMsg("菜单修改成功");
+          this.$message.success("菜单修改成功");
           //刷新页面
           this.getMenus();
           //展开当前父菜单
           this.expandedKey = [this.category.parentCid];
         })
         .catch(() => {
-          this.warningMsg("菜单修改失败");
+          this.$message.error("菜单修改失败");
         });
     },
     //删除三级菜单
@@ -198,21 +200,17 @@ export default {
             data: this.$http.adornData(ids, false)
           })
             .then(({ data }) => {
-              this.successMsg("菜单删除成功");
+              this.$message.error("菜单删除成功");
               //刷新页面
               this.getMenus();
               //展开当前父菜单
               this.expandedKey = [node.data.parentCid];
             })
             .catch(() => {
-              this.warningMsg("菜单删除失败");
+              this.$message.error("菜单删除失败");
             });
         })
         .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消删除"
-          });
         });
       console.log("删除节点", node, data);
     },
@@ -261,7 +259,7 @@ export default {
           //递归计算子结点
           this.nodeMaxLevel(node.childNodes[i]);
         }
-      }else{
+      } else {
         this.maxLevel = node.level;
       }
     },
@@ -313,20 +311,38 @@ export default {
         }
       }
     },
-    //成功提示
-    successMsg(msg = "操作成功") {
-      this.$message({
-        message: msg,
-        type: "success"
-      });
-    },
-    //失败提示
-    warningMsg(msg = "操作失败") {
-      this.$message({
-        message: msg,
+    batchRemove() {
+      let checkedNodes = this.$refs.menuTree.getCheckedNodes();
+      console.log(checkedNodes);
+      let catIds = [];
+      let names = [];
+      for (let i = 0; i < checkedNodes.length; i++) {
+        catIds.push(checkedNodes[i].catId);
+        names.push(checkedNodes[i].name);
+      }
+      this.$confirm(`是否删除「 ${names} 」?`, "警告", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
         type: "warning"
-      });
-    },
+      })
+        .then(() => {
+          this.$http({
+            url: this.$http.adornUrl("/product/category/delete"),
+            method: "post",
+            data: this.$http.adornData(catIds, false)
+          })
+            .then(({ data }) => {
+              this.$message.success("批量删除成功");
+              this.getMenus();
+              this.expandedKey = [checkedNodes[0].parentCid];
+            })
+            .catch(() => {
+              this.$message.error("批量删除失败");
+            });
+        })
+        .catch(() => {
+        });
+    }
   },
   //import引入的组件需要注入到对象中才能使用
   components: {},
