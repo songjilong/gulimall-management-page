@@ -15,6 +15,7 @@
         <el-input v-model="dataForm.name" placeholder="品牌名"></el-input>
       </el-form-item>
       <el-form-item label="品牌logo地址" prop="logo">
+        <!-- <el-input v-model="dataForm.logo" placeholder="品牌logo地址"></el-input> -->
         <single-upload v-model="dataForm.logo"></single-upload>
       </el-form-item>
       <el-form-item label="介绍" prop="descript">
@@ -46,9 +47,7 @@
 <script>
 import SingleUpload from "@/components/upload/singleUpload";
 export default {
-  components: {
-    SingleUpload
-  },
+  components: { SingleUpload },
   data() {
     return {
       visible: false,
@@ -79,12 +78,10 @@ export default {
         firstLetter: [
           {
             validator: (rule, value, callback) => {
-              if (value.trim() == "") {
-                callback(new Error("检索首字母不能为空"));
-              } else if (value.length > 1) {
-                callback(new Error("检索首字母必须是一个字母"));
+              if (value == "") {
+                callback(new Error("首字母必须填写"));
               } else if (!/^[a-zA-Z]$/.test(value)) {
-                callback(new Error("检索首字母必须在a-z或A-Z之间"));
+                callback(new Error("首字母必须a-z或者A-Z之间"));
               } else {
                 callback();
               }
@@ -96,11 +93,9 @@ export default {
           {
             validator: (rule, value, callback) => {
               if (value == "") {
-                callback(new Error("排序不能为空"));
-              } else if (!Number.isInteger(value)) {
-                callback(new Error("请输入数字值"));
-              } else if (value < 0) {
-                callback(new Error("不能输入负数"));
+                callback(new Error("排序字段必须填写"));
+              } else if (!Number.isInteger(value) || value<0) {
+                callback(new Error("排序必须是一个大于等于0的整数"));
               } else {
                 callback();
               }
