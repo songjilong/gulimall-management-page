@@ -216,13 +216,11 @@ export default {
 
       //1）、被拖动的当前节点总层数
       console.log("allowDrop:", draggingNode, dropNode, type);
-      //
+      this.maxLevel = draggingNode.level;
       this.countNodeLevel(draggingNode);
       //当前正在拖动的节点+父节点所在的深度不大于3即可
       let deep = Math.abs(this.maxLevel - draggingNode.level) + 1;
       console.log("深度：", deep);
-
-      //   this.maxLevel
       if (type == "inner") {
         // console.log(
         //   `this.maxLevel：${this.maxLevel}；draggingNode.data.catLevel：${draggingNode.data.catLevel}；dropNode.level：${dropNode.level}`
@@ -379,5 +377,13 @@ export default {
   activated() {} //如果页面有keep-alive缓存功能，这个函数会触发
 };
 </script>
-<style scoped>
+<style>
+  .custom-tree-node {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    padding-right: 8px;
+  }
 </style>
